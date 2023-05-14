@@ -31,5 +31,9 @@ If you're using AnyLog for backlog purposes it might be useful to delete certain
 
 * To delete an entry use `index.php?delete=[GUID]`
 
+## Notes
+
+* If you're planning to handle sensitive data with this tool on a publicly accessible server you should harden your system using at least htaccess restrictions.
+
 ## License
 tba
