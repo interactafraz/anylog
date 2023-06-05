@@ -1,7 +1,7 @@
 <?php 
 
 $file = "log.json";
-$entryLimit = 100;
+$entryLimit = 500;
 $previewTimeZone = "Europe/Berlin";//Only for preview output
 
 $logData = array();
