@@ -136,7 +136,7 @@ if ( file_exists($file) ) { //Check if data exists
 						$counter = $counter + 1;
 						
 						if($key == 'time'){
-							$time = DateTime::createFromFormat('U', $value)->setTimezone(new DateTimeZone($previewTimeZone))->format('d.m.Y \u\m H:i \U\h\r'); //Convert to datetime object							
+							$time = DateTime::createFromFormat('U', $value)->setTimezone(new DateTimeZone($previewTimeZone))->format('d.m.Y \a\t H:i'); //Convert to datetime object							
 							echo $time . ' - ';
 						}
 						else{
