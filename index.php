@@ -1,8 +1,8 @@
 <?php 
 
 $file = "log.json";
-$entryLimit = 500;
-$previewTimeZone = "Europe/Berlin";//Only for preview output
+$entryLimit = 250;
+$previewTimeZone = "Europe/Berlin"; //Only for preview output
 
 $logData = array();
 function addToLog($sentData,$fp) {
@@ -53,7 +53,7 @@ function addToLog($sentData,$fp) {
 if ( file_exists($file) ) { //Check if data exists
 
 	$fp = fopen($file, 'r+');
-	flock($fp, LOCK_EX); //Lock file to avoid other processes writing to it simlutanously 
+	flock($fp, LOCK_EX); //Lock file to avoid other processes writing to it simultaneously 
 	
 	$jsonData = stream_get_contents($fp);
 	if($jsonData == ""){
@@ -73,7 +73,11 @@ if ( file_exists($file) ) { //Check if data exists
 		addToLog( json_decode($_POST['data'], true),$fp );
 	}
 	elseif (!empty($_GET)) { //If data received via GET
-		if ( isset($_GET['delete']) ){ //If specific entry should be deleted
+		if ( isset($_GET['set']) && isset($_GET['content']) ){ //If entry should be set
+			$sentData = [ $_GET['set'] => $_GET['content'] ];
+			addToLog( $sentData,$fp );
+		}
+		elseif ( isset($_GET['delete']) ){ //If specific entry should be deleted
 			if (empty($logData)) {
 				echo "Could not read Log file (maybe empty)";
 				die;
@@ -106,8 +110,7 @@ if ( file_exists($file) ) { //Check if data exists
 			}
 			else{
 				echo "Entry not found (maybe already deleted?)";
-			}		
-			
+			}
 		}
 	}
 

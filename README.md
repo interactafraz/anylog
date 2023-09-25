@@ -10,9 +10,8 @@ It was developed for automated processes where different devices, apps and opera
 * As audit trail
 
 ## Features
-
 * Self host-able
-* Save keys and values (via POST method)
+* Save keys and values (via POST or GET requests)
 * Automatically assigns GUID to each log entry
 * Delete individual log entries
 * Limit maximum log entries
@@ -25,12 +24,17 @@ It was developed for automated processes where different devices, apps and opera
 * Copy files to web server
 
 ## Usage
-### Save data
-The script expects POST data in the following format
+### Save data - GET
+For simple use cases you can set a single key and its value with URL parameters:
 
-    {"meal": "Frozen Fries","quantity": "900"}
+    index.php?set=event&content=checkin
 
-**iOS Shortcuts:** To generate this format from an iOS Shortcut, follow this guide:
+### Save data - POST
+AnyLog expects POST data in the following format
+
+    {"event": "checkin","user": "John"}
+
+**Example: iOS Shortcuts:** To generate this format from an iOS Shortcut, follow this guide:
 1. Create a `dictionary` and add your keys/values as items
 2. Add the dictionary to a `text` action
 3. Use a `Get Contents of URL` action to send the data to your AnyLog instance. Set it up like this:
