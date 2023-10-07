@@ -49,78 +49,79 @@ function addToLog($sentData,$fp) {
 	fwrite($fp, json_encode($logData)); //Save new data to file
 }
 
-
-
-if ( file_exists($file) ) { //Check if data exists
-
-	$fp = fopen($file, 'r+');
-	flock($fp, LOCK_EX); //Lock file to avoid other processes writing to it simultaneously 
-	
-	$jsonData = stream_get_contents($fp);
-	if($jsonData == ""){
-		echo "Could not read Log file (maybe empty)";
-		die;
-	}
-	$logData = json_decode($jsonData, true);
-	
-	if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty(json_decode($_POST['data'], true))) { //If data received via POST
-		
-		//Debug
-		//$debug = fopen('debug.txt', 'w');
-		//fwrite($debug, $_POST['data']); //Save new data to file
-		//fclose($debug);
-		//Debug
-		
-		addToLog( json_decode($_POST['data'], true),$fp );
-	}
-	elseif (!empty($_GET)) { //If data received via GET
-		if ( isset($_GET['set']) && isset($_GET['content']) ){ //If entry should be set
-			$sentData = [ $_GET['set'] => $_GET['content'] ];
-			addToLog( $sentData,$fp );
-		}
-		elseif ( isset($_GET['delete']) ){ //If specific entry should be deleted
-			if (empty($logData)) {
-				echo "Could not read Log file (maybe empty)";
-				die;
-			}
-			
-			$counter = 0;
-			$targetFound = false;
-			
-			foreach ($logData as $entryExisting) { //Get every entry
-				foreach ($entryExisting as $key => $value) { //Get key and timestamp values
-				
-					if ($key == 'guid' && $value == $_GET['delete']){ //If target key has been found
-						unset($logData[$counter]);//Remove entry from logData
-						$targetFound = true;
-						break 2;
-					}
-					
-				}
-				$counter = $counter + 1;
-			}
-			
-			if($targetFound == true){
-				$logData = array_values($logData); //Rebuild index
-				
-				rewind($fp);
-				ftruncate($fp, 0);
-				fwrite($fp, json_encode($logData)); //Save new data to file
-				
-				echo 'Deleted';
-			}
-			else{
-				echo "Entry not found (maybe already deleted?)";
-			}
-		}
-	}
-
-	
+if ( !file_exists($file) ) { //Check if data does not exist yet
+	$fp = fopen($file, 'w+');
+	flock($fp, LOCK_EX); //Lock file to avoid other processes writing to it simlutanously 
+	fwrite($fp, json_encode(new stdClass)); //Save empty data to file	
 	flock($fp, LOCK_UN); //Unlock file for further access
-	fclose($fp);	
+	fclose($fp);
+}
+
+$fp = fopen($file, 'r+');
+flock($fp, LOCK_EX); //Lock file to avoid other processes writing to it simultaneously 
+
+$jsonData = stream_get_contents($fp);
+if($jsonData == ""){
+	echo "Could not read Log file (maybe empty)";
+	die;
+}
+$logData = json_decode($jsonData, true);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty(json_decode($_POST['data'], true))) { //If data received via POST
+	
+	//Debug
+	//$debug = fopen('debug.txt', 'w');
+	//fwrite($debug, $_POST['data']); //Save new data to file
+	//fclose($debug);
+	//Debug
+	
+	addToLog( json_decode($_POST['data'], true),$fp );
+}
+elseif (!empty($_GET)) { //If data received via GET
+	if ( isset($_GET['set']) && isset($_GET['content']) ){ //If entry should be set
+		$sentData = [ $_GET['set'] => $_GET['content'] ];
+		addToLog( $sentData,$fp );
+	}
+	elseif ( isset($_GET['delete']) ){ //If specific entry should be deleted
+		if (empty($logData)) {
+			echo "Could not read Log file (maybe empty)";
+			die;
+		}
+		
+		$counter = 0;
+		$targetFound = false;
+		
+		foreach ($logData as $entryExisting) { //Get every entry
+			foreach ($entryExisting as $key => $value) { //Get key and timestamp values
+			
+				if ($key == 'guid' && $value == $_GET['delete']){ //If target key has been found
+					unset($logData[$counter]);//Remove entry from logData
+					$targetFound = true;
+					break 2;
+				}
+				
+			}
+			$counter = $counter + 1;
+		}
+		
+		if($targetFound == true){
+			$logData = array_values($logData); //Rebuild index
+			
+			rewind($fp);
+			ftruncate($fp, 0);
+			fwrite($fp, json_encode($logData)); //Save new data to file
+			
+			echo 'Deleted';
+		}
+		else{
+			echo "Entry not found (maybe already deleted?)";
+		}
+	}
 }
 
 
+flock($fp, LOCK_UN); //Unlock file for further access
+fclose($fp);
 
 ?>
 
