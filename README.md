@@ -16,6 +16,7 @@ It was developed for automated processes where different devices, apps and opera
 * Delete individual log entries
 * Limit maximum log entries
 * Preview log entries in browser
+* Trigger webhook after updating entries
 
 ## Prerequisites
 * Common web server with PHP support

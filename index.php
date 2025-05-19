@@ -4,8 +4,31 @@ header('Access-Control-Allow-Origin: *');
 $file = "log.json";
 $entryLimit = 250;
 $previewTimeZone = "Europe/Berlin"; //Only for preview output
+$triggerWebhookUrl = "http://n8n:5678/webhook/trigger-anylog-based-workflows"; //URL that gets called after every entry update (optional, leave empty to disable)
 
 $logData = array();
+
+function callTriggerWebhook($sentData){
+	global $triggerWebhookUrl;
+	
+	if($triggerWebhookUrl != ""){
+		$ch = curl_init($triggerWebhookUrl);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT_MS, 150);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($sentData));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+		curl_setopt($ch, CURLOPT_HEADER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+		curl_exec($ch);
+		curl_close($ch);
+	}
+	
+}
+
 function addToLog($sentData,$fp) {
 	global $file;
 	global $logData;
@@ -47,6 +70,8 @@ function addToLog($sentData,$fp) {
 	rewind($fp);
 	ftruncate($fp, 0);
 	fwrite($fp, json_encode($logData)); //Save new data to file
+	
+	callTriggerWebhook($sentData);
 }
 
 if ( !file_exists($file) ) { //Check if data does not exist yet
